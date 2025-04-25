@@ -1,22 +1,19 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import "@nomiclabs/hardhat-ethers";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const config: HardhatUserConfig = {
-    solidity: "0.8.29",
+    solidity: "0.8.20",
     networks: {
-        hardhat: {},
+        sepolia: {
+            url: process.env.SEPOLIA_RPC || "",
+            accounts: [process.env.PRIVATE_KEY || ""],
+            gasPrice: 20000000000, // 20 gwei
+        },
         mainnet: {
-            url: process.env.RPC_URL || "",
-            accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+            url: process.env.MAINNET_RPC || "",
+            accounts: [process.env.PRIVATE_KEY || ""],
+            gasPrice: 50000000000, // 50 gwei
         }
-    },
-    typechain: {
-        outDir: "typechain-types",
-        target: "ethers-v5"
     }
 };
 

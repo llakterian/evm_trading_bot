@@ -1,0 +1,29 @@
+const { ethers } = require("hardhat");
+
+async function main() {
+    const [deployer] = await ethers.getSigners();
+
+    console.log("Testing with account:", deployer.address);
+    console.log("Balance:", ethers.formatEther(await deployer.getBalance()), "ETH");
+
+    // Simulate trade logic
+    const tx = {
+        to: "0x0000000000000000000000000000000000000000",
+        value: ethers.parseEther("0.001"),
+        data: "0x"
+    };
+
+    // Estimate gas
+    const gasEstimate = await deployer.estimateGas(tx);
+    console.log("Gas estimate:", gasEstimate.toString());
+
+    // Get gas price
+    const gasPrice = await ethers.provider.getGasPrice();
+    console.log("Current gas price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
+
+    // Calculate cost
+    const cost = gasEstimate * gasPrice;
+    console.log("Estimated cost:", ethers.formatEther(cost), "ETH");
+}
+
+main().catch(console.error);

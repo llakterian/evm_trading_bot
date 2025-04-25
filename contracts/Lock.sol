@@ -1,34 +1,33 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.28;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
-// Uncomment this line to use console.log
-// import "hardhat/console.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Lock {
-    uint public unlockTime;
-    address payable public owner;
+contract Lock is Ownable {
+    bool public someState;
+    uint256 public unlockTime;
+    
+    event ValueChanged(address indexed changer, bool newValue);
+    event Withdrawn(address indexed recipient, uint256 amount);
 
-    event Withdrawal(uint amount, uint when);
-
-    constructor(uint _unlockTime) payable {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
-
-        unlockTime = _unlockTime;
-        owner = payable(msg.sender);
+    constructor() Ownable() {
+        someState = true;
+        unlockTime = block.timestamp + 1 weeks;
+    }
+    function someFunction() external view returns (bool) {
+        return someState;
     }
 
-    function withdraw() public {
-        // Uncomment this line, and the import of "hardhat/console.sol", to print a log in your terminal
-        // console.log("Unlock time is %o and block timestamp is %o", unlockTime, block.timestamp);
-
-        require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        require(msg.sender == owner, "You aren't the owner");
-
-        emit Withdrawal(address(this).balance, block.timestamp);
-
-        owner.transfer(address(this).balance);
+    function toggleState() external onlyOwner {
+        someState = !someState;
+        emit ValueChanged(msg.sender, someState);
     }
+
+    function withdraw() external onlyOwner {
+        require(block.timestamp >= unlockTime, "Too early");
+        emit Withdrawn(msg.sender, address(this).balance);
+        payable(owner()).transfer(address(this).balance);
+    }
+
+    receive() external payable {}
 }
